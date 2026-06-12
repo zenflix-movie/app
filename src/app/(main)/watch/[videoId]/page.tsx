@@ -32,7 +32,6 @@ export default async function WatchPage({
       startAt = progress.watchDuration;
     }
   } catch {
-    // Stale cookie (foreign/deleted profile) — clear selection
     redirect("/profiles");
   }
 

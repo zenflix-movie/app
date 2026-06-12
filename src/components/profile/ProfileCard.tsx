@@ -24,7 +24,7 @@ export function ProfileCard({ profile, onClick, selected }: ProfileCardProps) {
         selected && "ring-2 ring-primary",
       )}
     >
-      <Avatar className="h-24 w-24">
+      <Avatar className="h-20 w-20 sm:h-24 sm:w-24">
         <AvatarImage src={profile.avatarUrl ?? undefined} alt={profile.name} />
         <AvatarFallback className="text-2xl bg-primary text-primary-foreground">
           {profile.name.slice(0, 1).toUpperCase()}

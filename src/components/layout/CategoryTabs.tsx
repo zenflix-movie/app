@@ -23,7 +23,8 @@ export function CategoryTabs() {
 
   return (
     <Tabs value={categoryId} onValueChange={handleChange}>
-      <TabsList className="flex-wrap h-auto gap-1">
+      <div className="overflow-x-auto">
+      <TabsList className="h-auto gap-1 flex-nowrap sm:flex-wrap w-max sm:w-auto">
         <TabsTrigger value="all">All</TabsTrigger>
         {categories?.map((cat) => (
           <TabsTrigger key={cat.id} value={String(cat.id)}>
@@ -31,6 +32,7 @@ export function CategoryTabs() {
           </TabsTrigger>
         ))}
       </TabsList>
+      </div>
     </Tabs>
   );
 }

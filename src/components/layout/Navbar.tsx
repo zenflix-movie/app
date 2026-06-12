@@ -2,13 +2,18 @@ import Link from "next/link";
 import { auth } from "~/server/auth";
 import { Button } from "~/components/ui/button";
 import { NavbarClient } from "./NavbarClient";
+import { MobileNav } from "./MobileNav";
 
 export async function Navbar() {
   const session = await auth();
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container mx-auto flex h-14 items-center px-4">
+    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur h-14">
+      <div className="container mx-auto flex h-14 items-center px-4 gap-1">
+        <MobileNav
+          isLoggedIn={!!session?.user}
+          isAdmin={session?.user.role === "admin"}
+        />
         <Link href="/browse" className="flex items-center gap-2 font-bold text-xl mr-6">
           <span className="text-red-600">Zen</span>flix
         </Link>

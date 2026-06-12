@@ -18,7 +18,7 @@ export default function SearchPage() {
 
   return (
     <div className="container mx-auto px-4 py-8 space-y-6">
-      <h1 className="text-2xl font-bold">Search</h1>
+      <h1 className="text-xl sm:text-2xl font-bold">Search</h1>
 
       <div className="relative max-w-lg">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />

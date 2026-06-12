@@ -33,7 +33,7 @@ export default async function HistoryPage() {
 
   return (
     <div className="container mx-auto px-4 py-8 space-y-6">
-      <h1 className="text-2xl font-bold">My List</h1>
+      <h1 className="text-xl sm:text-2xl font-bold">My List</h1>
 
       {entries.length === 0 ? (
         <p className="text-muted-foreground py-12 text-center">

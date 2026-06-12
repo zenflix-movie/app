@@ -40,10 +40,10 @@ export default function ProfilesPage() {
   });
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center gap-8 px-4">
+    <main className="min-h-[calc(100vh-5rem)] flex flex-col items-center justify-center gap-8 px-4">
       <h1 className="text-3xl font-semibold">Who&apos;s watching?</h1>
 
-      <div className="flex flex-wrap justify-center gap-6">
+      <div className="flex flex-wrap justify-center gap-4 sm:gap-6">
         {profiles?.map((profile) => (
           <ProfileCard
             key={profile.id}
@@ -56,7 +56,7 @@ export default function ProfilesPage() {
           <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
               <button className="flex flex-col items-center gap-3 p-4 rounded-xl hover:scale-105 transition-transform">
-                <div className="h-24 w-24 rounded-full border-2 border-dashed border-muted-foreground flex items-center justify-center">
+                <div className="h-20 w-20 sm:h-24 sm:w-24 rounded-full border-2 border-dashed border-muted-foreground flex items-center justify-center">
                   <Plus className="h-8 w-8 text-muted-foreground" />
                 </div>
                 <span className="text-sm font-medium text-muted-foreground">Add Profile</span>

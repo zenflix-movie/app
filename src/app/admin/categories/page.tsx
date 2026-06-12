@@ -117,6 +117,7 @@ export default function AdminCategoriesPage() {
         </DialogContent>
       </Dialog>
 
+      <div className="overflow-x-auto">
       <Table>
         <TableHeader>
           <TableRow>
@@ -155,6 +156,7 @@ export default function AdminCategoriesPage() {
           ))}
         </TableBody>
       </Table>
+      </div>
     </div>
   );
 }

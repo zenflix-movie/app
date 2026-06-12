@@ -16,10 +16,11 @@ export default function AdminUsersPage() {
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-bold">Users</h1>
+      <div className="overflow-x-auto">
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Name</TableHead>
+            <TableHead className="hidden sm:table-cell">Name</TableHead>
             <TableHead>Email</TableHead>
             <TableHead>Role</TableHead>
             <TableHead>Actions</TableHead>
@@ -28,7 +29,7 @@ export default function AdminUsersPage() {
         <TableBody>
           {data?.items.map((user) => (
             <TableRow key={user.id}>
-              <TableCell>{user.name ?? "—"}</TableCell>
+              <TableCell className="hidden sm:table-cell">{user.name ?? "—"}</TableCell>
               <TableCell>{user.email}</TableCell>
               <TableCell>
                 <Badge variant={user.role === "admin" ? "default" : "secondary"}>
@@ -54,6 +55,7 @@ export default function AdminUsersPage() {
           ))}
         </TableBody>
       </Table>
+      </div>
     </div>
   );
 }

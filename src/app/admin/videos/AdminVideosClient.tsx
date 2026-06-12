@@ -435,6 +435,7 @@ export function AdminVideosClient({ categories }: AdminVideosClientProps) {
         />
       )}
 
+      <div className="overflow-x-auto">
       <Table>
         <TableHeader>
           <TableRow>
@@ -496,6 +497,7 @@ export function AdminVideosClient({ categories }: AdminVideosClientProps) {
           ))}
         </TableBody>
       </Table>
+      </div>
     </div>
   );
 }

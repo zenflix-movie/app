@@ -59,3 +59,8 @@ body {
   background-color: var(--color-background);
   color: var(--color-foreground);
 }
+
+.media-default-skin {
+  border-radius: 0 !important;
+  background-color: transparent !important;
+}

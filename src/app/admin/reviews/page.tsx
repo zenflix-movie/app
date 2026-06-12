@@ -17,6 +17,7 @@ export default function AdminReviewsPage() {
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-bold">Reviews Moderation</h1>
+      <div className="overflow-x-auto">
       <Table>
         <TableHeader>
           <TableRow>
@@ -50,6 +51,7 @@ export default function AdminReviewsPage() {
           ))}
         </TableBody>
       </Table>
+      </div>
     </div>
   );
 }

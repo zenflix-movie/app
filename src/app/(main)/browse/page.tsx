@@ -26,7 +26,7 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
   return (
     <HydrateClient>
       <div className="container mx-auto px-4 py-8 space-y-6">
-        <h1 className="text-2xl font-bold">Browse</h1>
+        <h1 className="text-xl sm:text-2xl font-bold">Browse</h1>
 
         <Suspense>
           <CategoryTabs />
