@@ -69,6 +69,12 @@ CREATE TABLE "zenflix_verification_token" (
 	CONSTRAINT "zenflix_verification_token_identifier_token_pk" PRIMARY KEY("identifier","token")
 );
 --> statement-breakpoint
+CREATE TABLE "zenflix_video_category" (
+	"videoId" uuid NOT NULL,
+	"categoryId" integer NOT NULL,
+	CONSTRAINT "zenflix_video_category_videoId_categoryId_pk" PRIMARY KEY("videoId","categoryId")
+);
+--> statement-breakpoint
 CREATE TABLE "zenflix_video" (
 	"id" uuid PRIMARY KEY NOT NULL,
 	"name" varchar(255) NOT NULL,
@@ -77,7 +83,6 @@ CREATE TABLE "zenflix_video" (
 	"releaseYear" integer,
 	"fileUrl" varchar(1024) NOT NULL,
 	"thumbnailUrl" varchar(1024),
-	"categoryId" integer,
 	"createdAt" timestamp with time zone NOT NULL,
 	"updatedAt" timestamp with time zone
 );
@@ -97,12 +102,13 @@ ALTER TABLE "zenflix_profile" ADD CONSTRAINT "zenflix_profile_userId_zenflix_use
 ALTER TABLE "zenflix_review" ADD CONSTRAINT "zenflix_review_videoId_zenflix_video_id_fk" FOREIGN KEY ("videoId") REFERENCES "public"."zenflix_video"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "zenflix_review" ADD CONSTRAINT "zenflix_review_userId_zenflix_user_id_fk" FOREIGN KEY ("userId") REFERENCES "public"."zenflix_user"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "zenflix_session" ADD CONSTRAINT "zenflix_session_userId_zenflix_user_id_fk" FOREIGN KEY ("userId") REFERENCES "public"."zenflix_user"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "zenflix_video" ADD CONSTRAINT "zenflix_video_categoryId_zenflix_category_id_fk" FOREIGN KEY ("categoryId") REFERENCES "public"."zenflix_category"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "zenflix_video_category" ADD CONSTRAINT "zenflix_video_category_videoId_zenflix_video_id_fk" FOREIGN KEY ("videoId") REFERENCES "public"."zenflix_video"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "zenflix_video_category" ADD CONSTRAINT "zenflix_video_category_categoryId_zenflix_category_id_fk" FOREIGN KEY ("categoryId") REFERENCES "public"."zenflix_category"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "zenflix_watch_history" ADD CONSTRAINT "zenflix_watch_history_videoId_zenflix_video_id_fk" FOREIGN KEY ("videoId") REFERENCES "public"."zenflix_video"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "zenflix_watch_history" ADD CONSTRAINT "zenflix_watch_history_profileId_zenflix_profile_id_fk" FOREIGN KEY ("profileId") REFERENCES "public"."zenflix_profile"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 CREATE INDEX "account_user_id_idx" ON "zenflix_account" USING btree ("userId");--> statement-breakpoint
 CREATE INDEX "review_video_idx" ON "zenflix_review" USING btree ("videoId");--> statement-breakpoint
 CREATE INDEX "t_user_id_idx" ON "zenflix_session" USING btree ("userId");--> statement-breakpoint
-CREATE INDEX "video_category_idx" ON "zenflix_video" USING btree ("categoryId");--> statement-breakpoint
+CREATE INDEX "video_category_category_idx" ON "zenflix_video_category" USING btree ("categoryId");--> statement-breakpoint
 CREATE INDEX "video_name_idx" ON "zenflix_video" USING btree ("name");--> statement-breakpoint
 CREATE INDEX "watch_history_profile_idx" ON "zenflix_watch_history" USING btree ("profileId");

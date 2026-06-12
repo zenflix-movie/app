@@ -1,5 +1,5 @@
 {
-  "id": "8f42e74f-0bab-4583-8f7f-2a3adf07796c",
+  "id": "94fa330c-b231-432c-a6ba-75ffa9cc791d",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -533,6 +533,82 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
+    "public.zenflix_video_category": {
+      "name": "zenflix_video_category",
+      "schema": "",
+      "columns": {
+        "videoId": {
+          "name": "videoId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "categoryId": {
+          "name": "categoryId",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "video_category_category_idx": {
+          "name": "video_category_category_idx",
+          "columns": [
+            {
+              "expression": "categoryId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "zenflix_video_category_videoId_zenflix_video_id_fk": {
+          "name": "zenflix_video_category_videoId_zenflix_video_id_fk",
+          "tableFrom": "zenflix_video_category",
+          "tableTo": "zenflix_video",
+          "columnsFrom": [
+            "videoId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "zenflix_video_category_categoryId_zenflix_category_id_fk": {
+          "name": "zenflix_video_category_categoryId_zenflix_category_id_fk",
+          "tableFrom": "zenflix_video_category",
+          "tableTo": "zenflix_category",
+          "columnsFrom": [
+            "categoryId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "zenflix_video_category_videoId_categoryId_pk": {
+          "name": "zenflix_video_category_videoId_categoryId_pk",
+          "columns": [
+            "videoId",
+            "categoryId"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
     "public.zenflix_video": {
       "name": "zenflix_video",
       "schema": "",
@@ -579,12 +655,6 @@
           "primaryKey": false,
           "notNull": false
         },
-        "categoryId": {
-          "name": "categoryId",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
         "createdAt": {
           "name": "createdAt",
           "type": "timestamp with time zone",
@@ -599,21 +669,6 @@
         }
       },
       "indexes": {
-        "video_category_idx": {
-          "name": "video_category_idx",
-          "columns": [
-            {
-              "expression": "categoryId",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
         "video_name_idx": {
           "name": "video_name_idx",
           "columns": [
@@ -630,21 +685,7 @@
           "with": {}
         }
       },
-      "foreignKeys": {
-        "zenflix_video_categoryId_zenflix_category_id_fk": {
-          "name": "zenflix_video_categoryId_zenflix_category_id_fk",
-          "tableFrom": "zenflix_video",
-          "tableTo": "zenflix_category",
-          "columnsFrom": [
-            "categoryId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "set null",
-          "onUpdate": "no action"
-        }
-      },
+      "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "policies": {},
