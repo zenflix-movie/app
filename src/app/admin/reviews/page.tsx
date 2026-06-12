@@ -22,7 +22,7 @@ export default function AdminReviewsPage() {
         <TableHeader>
           <TableRow>
             <TableHead>Video</TableHead>
-            <TableHead>User</TableHead>
+            <TableHead>Profile</TableHead>
             <TableHead>Rating</TableHead>
             <TableHead>Comment</TableHead>
             <TableHead className="w-12"></TableHead>
@@ -32,7 +32,7 @@ export default function AdminReviewsPage() {
           {data?.map((review) => (
             <TableRow key={review.id}>
               <TableCell className="font-medium">{review.video.name}</TableCell>
-              <TableCell>{review.user.name ?? review.user.email}</TableCell>
+              <TableCell>{review.profile.name}</TableCell>
               <TableCell><StarRating value={review.rating} readOnly size="sm" /></TableCell>
               <TableCell className="text-sm text-muted-foreground max-w-xs truncate">
                 {review.comment ?? "—"}

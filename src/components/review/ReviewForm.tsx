@@ -8,11 +8,12 @@ import { api } from "~/trpc/react";
 
 interface ReviewFormProps {
   videoId: string;
+  profileId: string;
   existingReview?: { id: string; rating: number; comment?: string | null } | null;
   onSuccess?: () => void;
 }
 
-export function ReviewForm({ videoId, existingReview, onSuccess }: ReviewFormProps) {
+export function ReviewForm({ videoId, profileId, existingReview, onSuccess }: ReviewFormProps) {
   const [rating, setRating] = useState(existingReview?.rating ?? 0);
   const [comment, setComment] = useState(existingReview?.comment ?? "");
 
@@ -21,7 +22,7 @@ export function ReviewForm({ videoId, existingReview, onSuccess }: ReviewFormPro
   const create = api.reviews.create.useMutation({
     onSuccess: () => {
       void utils.reviews.listByVideo.invalidate({ videoId });
-      void utils.reviews.myReview.invalidate({ videoId });
+      void utils.reviews.myReview.invalidate({ videoId, profileId });
       onSuccess?.();
     },
   });
@@ -29,7 +30,7 @@ export function ReviewForm({ videoId, existingReview, onSuccess }: ReviewFormPro
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (rating === 0) return;
-    create.mutate({ videoId, rating, comment: comment || undefined });
+    create.mutate({ videoId, profileId, rating, comment: comment || undefined });
   }
 
   return (

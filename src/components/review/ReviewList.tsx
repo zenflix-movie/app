@@ -1,7 +1,7 @@
 "use client";
 
 import { StarRating } from "./StarRating";
-import { Avatar, AvatarFallback } from "~/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { api } from "~/trpc/react";
 
 interface ReviewListProps {
@@ -19,15 +19,14 @@ export function ReviewList({ videoId }: ReviewListProps) {
       {data.items.map((review) => (
         <div key={review.id} className="flex gap-3">
           <Avatar className="h-8 w-8 shrink-0">
+            <AvatarImage src={review.profile.avatarUrl ?? undefined} alt={review.profile.name} />
             <AvatarFallback className="text-xs">
-              {(review.user.name ?? review.user.email).slice(0, 1).toUpperCase()}
+              {review.profile.name.slice(0, 1).toUpperCase()}
             </AvatarFallback>
           </Avatar>
           <div className="space-y-1">
             <div className="flex items-center gap-2">
-              <span className="text-sm font-medium">
-                {review.user.name ?? review.user.email}
-              </span>
+              <span className="text-sm font-medium">{review.profile.name}</span>
               <StarRating value={review.rating} readOnly size="sm" />
             </div>
             {review.comment && (

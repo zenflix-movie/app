@@ -2,6 +2,7 @@ import { z } from "zod";
 
 export const createReviewSchema = z.object({
   videoId: z.string().uuid(),
+  profileId: z.string().uuid(),
   rating: z.number().int().min(1).max(5),
   comment: z.string().optional(),
 });

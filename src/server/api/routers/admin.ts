@@ -56,7 +56,7 @@ export const adminRouter = createTRPCRouter({
       )
       .query(async ({ ctx, input }) => {
         return ctx.db.query.reviews.findMany({
-          with: { user: true, video: true },
+          with: { profile: true, video: true },
           limit: input.limit,
           orderBy: (r, { desc }) => desc(r.createdAt),
         });

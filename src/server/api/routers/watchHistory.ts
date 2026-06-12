@@ -1,23 +1,9 @@
 import { and, eq } from "drizzle-orm";
 import { z } from "zod";
-import { TRPCError } from "@trpc/server";
 
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
-import { profiles, watchHistory } from "~/server/db/schema";
-import type { db as Database } from "~/server/db";
-
-async function assertProfileOwnership(
-  db: typeof Database,
-  profileId: string,
-  userId: string,
-) {
-  const profile = await db.query.profiles.findFirst({
-    where: and(eq(profiles.id, profileId), eq(profiles.userId, userId)),
-  });
-  if (!profile) {
-    throw new TRPCError({ code: "FORBIDDEN", message: "Profile does not belong to you" });
-  }
-}
+import { assertProfileOwnership } from "~/server/api/helpers";
+import { watchHistory } from "~/server/db/schema";
 
 export const watchHistoryRouter = createTRPCRouter({
   upsert: protectedProcedure

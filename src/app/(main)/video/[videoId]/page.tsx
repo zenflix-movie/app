@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import { api, HydrateClient } from "~/trpc/server";
 import { Button } from "~/components/ui/button";
@@ -15,6 +16,8 @@ export default async function VideoDetailPage({
 }) {
   const { videoId } = await params;
   const session = await auth();
+  const cookieStore = await cookies();
+  const profileId = cookieStore.get("selectedProfileId")?.value;
 
   let video;
   try {
@@ -74,7 +77,9 @@ export default async function VideoDetailPage({
 
         <div className="space-y-4">
           <h2 className="text-xl font-semibold">Reviews</h2>
-          {session?.user && <ReviewFormSection videoId={videoId} />}
+          {session?.user && profileId && (
+            <ReviewFormSection videoId={videoId} profileId={profileId} />
+          )}
           <ReviewList videoId={videoId} />
         </div>
       </div>

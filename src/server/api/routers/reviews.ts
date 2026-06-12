@@ -7,6 +7,7 @@ import {
   protectedProcedure,
   publicProcedure,
 } from "~/server/api/trpc";
+import { assertProfileOwnership } from "~/server/api/helpers";
 import { reviews } from "~/server/db/schema";
 import { createReviewSchema, updateReviewSchema } from "~/lib/validations/review";
 
@@ -22,7 +23,7 @@ export const reviewsRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       const items = await ctx.db.query.reviews.findMany({
         where: eq(reviews.videoId, input.videoId),
-        with: { user: true },
+        with: { profile: true },
         limit: input.limit + 1,
         orderBy: (r, { desc }) => desc(r.createdAt),
       });
@@ -37,12 +38,14 @@ export const reviewsRouter = createTRPCRouter({
     }),
 
   myReview: protectedProcedure
-    .input(z.object({ videoId: z.string().uuid() }))
+    .input(z.object({ videoId: z.string().uuid(), profileId: z.string().uuid() }))
     .query(async ({ ctx, input }) => {
+      await assertProfileOwnership(ctx.db, input.profileId, ctx.session.user.id);
+
       return ctx.db.query.reviews.findFirst({
         where: and(
           eq(reviews.videoId, input.videoId),
-          eq(reviews.userId, ctx.session.user.id),
+          eq(reviews.profileId, input.profileId),
         ),
       });
     }),
@@ -50,11 +53,13 @@ export const reviewsRouter = createTRPCRouter({
   create: protectedProcedure
     .input(createReviewSchema)
     .mutation(async ({ ctx, input }) => {
+      await assertProfileOwnership(ctx.db, input.profileId, ctx.session.user.id);
+
       const [review] = await ctx.db
         .insert(reviews)
-        .values({ ...input, userId: ctx.session.user.id })
+        .values(input)
         .onConflictDoUpdate({
-          target: [reviews.videoId, reviews.userId],
+          target: [reviews.videoId, reviews.profileId],
           set: { rating: input.rating, comment: input.comment },
         })
         .returning();
@@ -67,9 +72,13 @@ export const reviewsRouter = createTRPCRouter({
       const { id, ...data } = input;
       const review = await ctx.db.query.reviews.findFirst({
         where: eq(reviews.id, id),
+        with: { profile: true },
       });
       if (!review) throw new TRPCError({ code: "NOT_FOUND" });
-      if (review.userId !== ctx.session.user.id && ctx.session.user.role !== "admin") {
+      if (
+        review.profile.userId !== ctx.session.user.id &&
+        ctx.session.user.role !== "admin"
+      ) {
         throw new TRPCError({ code: "FORBIDDEN" });
       }
 
@@ -86,9 +95,13 @@ export const reviewsRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const review = await ctx.db.query.reviews.findFirst({
         where: eq(reviews.id, input.id),
+        with: { profile: true },
       });
       if (!review) throw new TRPCError({ code: "NOT_FOUND" });
-      if (review.userId !== ctx.session.user.id && ctx.session.user.role !== "admin") {
+      if (
+        review.profile.userId !== ctx.session.user.id &&
+        ctx.session.user.role !== "admin"
+      ) {
         throw new TRPCError({ code: "FORBIDDEN" });
       }
 

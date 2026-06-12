@@ -30,7 +30,6 @@ export const users = createTable("user", (d) => ({
 export const usersRelations = relations(users, ({ many }) => ({
   accounts: many(accounts),
   profiles: many(profiles),
-  reviews: many(reviews),
 }));
 
 export const accounts = createTable(
@@ -109,6 +108,7 @@ export const profiles = createTable("profile", (d) => ({
 export const profilesRelations = relations(profiles, ({ one, many }) => ({
   user: one(users, { fields: [profiles.userId], references: [users.id] }),
   watchHistory: many(watchHistory),
+  reviews: many(reviews),
 }));
 
 export const categories = createTable("category", (d) => ({
@@ -196,10 +196,10 @@ export const reviews = createTable(
       .uuid()
       .notNull()
       .references(() => videos.id, { onDelete: "cascade" }),
-    userId: d
-      .varchar({ length: 255 })
+    profileId: d
+      .uuid()
       .notNull()
-      .references(() => users.id, { onDelete: "cascade" }),
+      .references(() => profiles.id, { onDelete: "cascade" }),
     createdAt: d
       .timestamp({ withTimezone: true })
       .$defaultFn(() => new Date())
@@ -207,14 +207,14 @@ export const reviews = createTable(
     updatedAt: d.timestamp({ withTimezone: true }).$onUpdate(() => new Date()),
   }),
   (t) => [
-    unique("review_video_user_unique").on(t.videoId, t.userId),
+    unique("review_video_profile_unique").on(t.videoId, t.profileId),
     index("review_video_idx").on(t.videoId),
   ],
 );
 
 export const reviewsRelations = relations(reviews, ({ one }) => ({
   video: one(videos, { fields: [reviews.videoId], references: [videos.id] }),
-  user: one(users, { fields: [reviews.userId], references: [users.id] }),
+  profile: one(profiles, { fields: [reviews.profileId], references: [profiles.id] }),
 }));
 
 export const watchHistory = createTable(
