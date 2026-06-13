@@ -1,8 +1,6 @@
 "use client";
 
 import { useCallback } from "react";
-import Link from "next/link";
-import { ChevronLeft } from "lucide-react";
 import { VideoPlayer } from "~/components/video/VideoPlayer";
 import { api } from "~/trpc/react";
 
