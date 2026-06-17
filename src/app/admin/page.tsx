@@ -1,13 +1,20 @@
-import { api } from "~/trpc/server";
+import { count } from "drizzle-orm";
+import { db } from "~/server/db";
+import { categories, reviews, users, videos } from "~/server/db/schema";
 
 export default async function AdminDashboard() {
-  const categories = await api.categories.list();
+  const [videoStats, categoryStats, userStats, reviewStats] = await Promise.all([
+    db.select({ value: count() }).from(videos),
+    db.select({ value: count() }).from(categories),
+    db.select({ value: count() }).from(users),
+    db.select({ value: count() }).from(reviews),
+  ]);
 
   const stats = [
-    { label: "Videos", value: "—" },
-    { label: "Categories", value: categories.length },
-    { label: "Users", value: "—" },
-    { label: "Reviews", value: "—" },
+    { label: "Videos", value: videoStats[0]?.value ?? 0 },
+    { label: "Categories", value: categoryStats[0]?.value ?? 0 },
+    { label: "Users", value: userStats[0]?.value ?? 0 },
+    { label: "Reviews", value: reviewStats[0]?.value ?? 0 },
   ];
 
   return (

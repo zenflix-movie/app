@@ -18,16 +18,16 @@ export function VideoCard({ video }: VideoCardProps) {
   return (
     <Link href={`/video/${video.id}`} className="block group">
       <Card className="overflow-hidden transition-transform group-hover:scale-105">
-        <div className="relative aspect-video bg-muted">
+        <div className="relative aspect-video overflow-hidden bg-muted">
           {video.thumbnailUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
               src={video.thumbnailUrl}
               alt={video.name}
-              className="w-full h-full object-cover"
+              className="absolute inset-0 h-full w-full object-cover"
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center text-muted-foreground text-sm">
+            <div className="absolute inset-0 flex items-center justify-center text-muted-foreground text-sm">
               No thumbnail
             </div>
           )}

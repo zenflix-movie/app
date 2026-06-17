@@ -26,19 +26,22 @@ export default async function VideoDetailPage({
     notFound();
   }
 
+  // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
+  const backdropUrl = video.backdropUrl || video.thumbnailUrl;
+
   return (
     <HydrateClient>
       <div className="container mx-auto px-4 py-8 max-w-4xl space-y-8">
         <div className="relative aspect-video rounded-xl overflow-hidden bg-muted">
-          {video.thumbnailUrl ? (
+          {backdropUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
-              src={video.thumbnailUrl}
+              src={backdropUrl}
               alt={video.name}
-              className="w-full h-full object-cover"
+              className="absolute inset-0 h-full w-full object-cover"
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center text-muted-foreground">
+            <div className="absolute inset-0 flex items-center justify-center text-muted-foreground">
               No thumbnail
             </div>
           )}
