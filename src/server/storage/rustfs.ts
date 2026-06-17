@@ -61,3 +61,17 @@ export async function deleteObject(key: string): Promise<void> {
     new DeleteObjectCommand({ Bucket: env.RUSTFS_BUCKET, Key: key }),
   );
 }
+
+function isAbsoluteUrl(value: string): boolean {
+  return /^https?:\/\//i.test(value);
+}
+
+/** Return external URLs as-is; presign S3 object keys for download. */
+export async function resolveMediaUrl(
+  value: string | null | undefined,
+  expiresIn = 3600,
+): Promise<string | null> {
+  if (!value) return null;
+  if (isAbsoluteUrl(value)) return value;
+  return getPresignedDownloadUrl(value, expiresIn).catch(() => null);
+}

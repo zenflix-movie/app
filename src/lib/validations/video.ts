@@ -7,6 +7,8 @@ export const createVideoSchema = z.object({
   releaseYear: z.number().int().min(1888).max(2100).optional(),
   fileUrl: z.string().min(1, "File URL is required"),
   thumbnailUrl: z.string().optional(),
+  backdropUrl: z.string().optional(),
+  tmdbId: z.number().int().positive(),
   categoryIds: z.array(z.number().int().positive()).optional(),
 });
 

@@ -1,12 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { Textarea } from "~/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "~/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "~/components/ui/table";
+import { AdminTableControls } from "~/components/admin/AdminTableControls";
+import { useDebouncedValue } from "~/hooks/use-debounced-value";
 import { api } from "~/trpc/react";
 import { Pencil, Plus, Trash2 } from "lucide-react";
 
@@ -21,12 +23,24 @@ export default function AdminCategoriesPage() {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [editing, setEditing] = useState<EditingCategory | null>(null);
+  const [query, setQuery] = useState("");
+  const [page, setPage] = useState(1);
+  const debouncedQuery = useDebouncedValue(query);
+
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedQuery]);
 
   const utils = api.useUtils();
-  const { data: categories } = api.categories.list.useQuery();
+  const { data, isLoading } = api.admin.categories.list.useQuery({
+    query: debouncedQuery || undefined,
+    page,
+    limit: 20,
+  });
 
   const create = api.categories.create.useMutation({
     onSuccess: () => {
+      void utils.admin.categories.list.invalidate();
       void utils.categories.list.invalidate();
       setAddOpen(false);
       setName("");
@@ -36,13 +50,17 @@ export default function AdminCategoriesPage() {
 
   const update = api.categories.update.useMutation({
     onSuccess: () => {
+      void utils.admin.categories.list.invalidate();
       void utils.categories.list.invalidate();
       setEditing(null);
     },
   });
 
   const remove = api.categories.delete.useMutation({
-    onSuccess: () => void utils.categories.list.invalidate(),
+    onSuccess: () => {
+      void utils.admin.categories.list.invalidate();
+      void utils.categories.list.invalidate();
+    },
   });
 
   return (
@@ -77,6 +95,17 @@ export default function AdminCategoriesPage() {
           </DialogContent>
         </Dialog>
       </div>
+
+      <AdminTableControls
+        query={query}
+        onQueryChange={setQuery}
+        searchPlaceholder="Search categories…"
+        page={page}
+        totalPages={data?.totalPages ?? 1}
+        total={data?.total ?? 0}
+        onPageChange={setPage}
+        isLoading={isLoading}
+      />
 
       <Dialog open={!!editing} onOpenChange={(v) => !v && setEditing(null)}>
         <DialogContent>
@@ -127,7 +156,7 @@ export default function AdminCategoriesPage() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {categories?.map((cat) => (
+          {data?.items.map((cat) => (
             <TableRow key={cat.id}>
               <TableCell className="font-medium">{cat.name}</TableCell>
               <TableCell className="text-muted-foreground text-sm">{cat.description ?? "—"}</TableCell>

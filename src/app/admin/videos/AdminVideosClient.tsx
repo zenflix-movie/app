@@ -8,6 +8,8 @@ import { Textarea } from "~/components/ui/textarea";
 import { Badge } from "~/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "~/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "~/components/ui/table";
+import { AdminTableControls } from "~/components/admin/AdminTableControls";
+import { useDebouncedValue } from "~/hooks/use-debounced-value";
 import { api } from "~/trpc/react";
 import { CheckCircle2, Pencil, Plus, Trash2, UploadCloud, XCircle } from "lucide-react";
 import { cn, formatDuration } from "~/lib/utils";
@@ -201,6 +203,7 @@ interface VideoFormValues {
   categoryIds: number[];
   fileKey: string;
   thumbnailKey: string;
+  tmdbId: string;
 }
 
 interface EditableVideo {
@@ -211,6 +214,7 @@ interface EditableVideo {
   duration: number | null;
   fileUrl: string;
   thumbnailUrl: string | null;
+  tmdbId: number;
   categories: Category[];
 }
 
@@ -233,6 +237,7 @@ function VideoFormDialog({ categories, initial, open, onOpenChange, trigger }: V
     categoryIds: [],
     fileKey: "",
     thumbnailKey: "",
+    tmdbId: "",
   };
 
   const [form, setForm] = useState<VideoFormValues>(emptyValues);
@@ -250,6 +255,7 @@ function VideoFormDialog({ categories, initial, open, onOpenChange, trigger }: V
               // In edit mode keys stay as-is unless a new file is uploaded.
               fileKey: initial.fileUrl,
               thumbnailKey: "",
+              tmdbId: String(initial.tmdbId),
             }
           : emptyValues,
       );
@@ -259,7 +265,7 @@ function VideoFormDialog({ categories, initial, open, onOpenChange, trigger }: V
 
   const utils = api.useUtils();
   const onSuccess = () => {
-    void utils.videos.list.invalidate();
+    void utils.admin.videos.list.invalidate();
     onOpenChange(false);
   };
   const createVideo = api.videos.create.useMutation({ onSuccess });
@@ -291,18 +297,20 @@ function VideoFormDialog({ categories, initial, open, onOpenChange, trigger }: V
         ...common,
         fileUrl: form.fileKey || undefined,
         thumbnailUrl: form.thumbnailKey || undefined,
+        tmdbId: form.tmdbId ? parseInt(form.tmdbId) : undefined,
       });
     } else {
-      if (!form.fileKey) return;
+      if (!form.fileKey || !form.tmdbId) return;
       createVideo.mutate({
         ...common,
         fileUrl: form.fileKey,
         thumbnailUrl: form.thumbnailKey || undefined,
+        tmdbId: parseInt(form.tmdbId),
       });
     }
   }
 
-  const canSubmit = form.name && (isEdit || form.fileKey) && !isPending;
+  const canSubmit = form.name && form.tmdbId && (isEdit || form.fileKey) && !isPending;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -367,6 +375,16 @@ function VideoFormDialog({ categories, initial, open, onOpenChange, trigger }: V
             />
           </div>
           <div className="space-y-2">
+            <Label>TMDB ID <span className="text-destructive">*</span></Label>
+            <Input
+              type="number"
+              value={form.tmdbId}
+              onChange={(e) => setForm({ ...form, tmdbId: e.target.value })}
+              required
+              min="1"
+            />
+          </div>
+          <div className="space-y-2">
             <Label>Categories</Label>
             <div className="flex flex-wrap gap-2">
               {categories.map((cat) => {
@@ -402,13 +420,24 @@ function VideoFormDialog({ categories, initial, open, onOpenChange, trigger }: V
 export function AdminVideosClient({ categories }: AdminVideosClientProps) {
   const [addOpen, setAddOpen] = useState(false);
   const [editing, setEditing] = useState<EditableVideo | null>(null);
+  const [query, setQuery] = useState("");
+  const [page, setPage] = useState(1);
+  const debouncedQuery = useDebouncedValue(query);
+
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedQuery]);
 
   const utils = api.useUtils();
   const deleteVideo = api.videos.delete.useMutation({
-    onSuccess: () => void utils.videos.list.invalidate(),
+    onSuccess: () => void utils.admin.videos.list.invalidate(),
   });
 
-  const { data } = api.videos.list.useQuery({ limit: 100 });
+  const { data, isLoading } = api.admin.videos.list.useQuery({
+    query: debouncedQuery || undefined,
+    page,
+    limit: 20,
+  });
 
   return (
     <div className="space-y-6">
@@ -425,6 +454,17 @@ export function AdminVideosClient({ categories }: AdminVideosClientProps) {
           }
         />
       </div>
+
+      <AdminTableControls
+        query={query}
+        onQueryChange={setQuery}
+        searchPlaceholder="Search videos by name, description, or TMDB ID…"
+        page={page}
+        totalPages={data?.totalPages ?? 1}
+        total={data?.total ?? 0}
+        onPageChange={setPage}
+        isLoading={isLoading}
+      />
 
       {editing && (
         <VideoFormDialog
@@ -477,6 +517,7 @@ export function AdminVideosClient({ categories }: AdminVideosClientProps) {
                         duration: video.duration,
                         fileUrl: video.fileUrl,
                         thumbnailUrl: video.thumbnailUrl,
+                        tmdbId: video.tmdbId,
                         categories: video.categories,
                       })
                     }

@@ -9,7 +9,7 @@ import {
   publicProcedure,
 } from "~/server/api/trpc";
 import { reviews, videoCategories, videos } from "~/server/db/schema";
-import { getPresignedDownloadUrl, getPresignedUploadUrl } from "~/server/storage/rustfs";
+import { getPresignedUploadUrl, resolveMediaUrl } from "~/server/storage/rustfs";
 import { createVideoSchema, updateVideoSchema } from "~/lib/validations/video";
 
 const videoWithCategories = {
@@ -18,19 +18,21 @@ const videoWithCategories = {
 
 type RawVideo = {
   thumbnailUrl: string | null;
+  backdropUrl: string | null;
   videoCategories: { category: { id: number; name: string } }[];
 };
 
-/** Flatten join rows to a simple categories array and presign the thumbnail key. */
+/** Flatten join rows and resolve thumbnail/backdrop URLs. */
 async function shapeVideo<T extends RawVideo>(video: T) {
   const { videoCategories: vc, ...rest } = video;
-  let thumbnailUrl = video.thumbnailUrl;
-  if (thumbnailUrl) {
-    thumbnailUrl = await getPresignedDownloadUrl(thumbnailUrl).catch(() => null);
-  }
+  const [thumbnailUrl, backdropUrl] = await Promise.all([
+    resolveMediaUrl(video.thumbnailUrl),
+    resolveMediaUrl(video.backdropUrl),
+  ]);
   return {
     ...rest,
     thumbnailUrl,
+    backdropUrl,
     categories: vc.map((row) => row.category),
   };
 }
@@ -126,7 +128,8 @@ export const videosRouter = createTRPCRouter({
       });
       if (!video) throw new TRPCError({ code: "NOT_FOUND" });
 
-      const url = await getPresignedDownloadUrl(video.fileUrl, 7200);
+      const url = await resolveMediaUrl(video.fileUrl, 7200);
+      if (!url) throw new TRPCError({ code: "NOT_FOUND", message: "Stream unavailable" });
       return { url };
     }),
 

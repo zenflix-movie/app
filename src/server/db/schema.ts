@@ -139,6 +139,8 @@ export const videos = createTable(
     releaseYear: d.integer(),
     fileUrl: d.varchar({ length: 1024 }).notNull(),
     thumbnailUrl: d.varchar({ length: 1024 }),
+    backdropUrl: d.varchar({ length: 1024 }),
+    tmdbId: d.integer().notNull(),
     createdAt: d
       .timestamp({ withTimezone: true })
       .$defaultFn(() => new Date())

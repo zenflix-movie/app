@@ -1,14 +1,29 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { Button } from "~/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "~/components/ui/table";
 import { StarRating } from "~/components/review/StarRating";
+import { AdminTableControls } from "~/components/admin/AdminTableControls";
+import { useDebouncedValue } from "~/hooks/use-debounced-value";
 import { api } from "~/trpc/react";
 import { Trash2 } from "lucide-react";
 
 export default function AdminReviewsPage() {
+  const [query, setQuery] = useState("");
+  const [page, setPage] = useState(1);
+  const debouncedQuery = useDebouncedValue(query);
+
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedQuery]);
+
   const utils = api.useUtils();
-  const { data } = api.admin.reviews.list.useQuery({});
+  const { data, isLoading } = api.admin.reviews.list.useQuery({
+    query: debouncedQuery || undefined,
+    page,
+    limit: 20,
+  });
 
   const remove = api.admin.reviews.delete.useMutation({
     onSuccess: () => void utils.admin.reviews.list.invalidate(),
@@ -17,6 +32,18 @@ export default function AdminReviewsPage() {
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-bold">Reviews Moderation</h1>
+
+      <AdminTableControls
+        query={query}
+        onQueryChange={setQuery}
+        searchPlaceholder="Search by video, profile, or comment…"
+        page={page}
+        totalPages={data?.totalPages ?? 1}
+        total={data?.total ?? 0}
+        onPageChange={setPage}
+        isLoading={isLoading}
+      />
+
       <div className="overflow-x-auto">
       <Table>
         <TableHeader>
@@ -29,7 +56,7 @@ export default function AdminReviewsPage() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {data?.map((review) => (
+          {data?.items.map((review) => (
             <TableRow key={review.id}>
               <TableCell className="font-medium">{review.video.name}</TableCell>
               <TableCell>{review.profile.name}</TableCell>

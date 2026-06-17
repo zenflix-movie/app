@@ -1,13 +1,28 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "~/components/ui/table";
+import { AdminTableControls } from "~/components/admin/AdminTableControls";
+import { useDebouncedValue } from "~/hooks/use-debounced-value";
 import { api } from "~/trpc/react";
 
 export default function AdminUsersPage() {
+  const [query, setQuery] = useState("");
+  const [page, setPage] = useState(1);
+  const debouncedQuery = useDebouncedValue(query);
+
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedQuery]);
+
   const utils = api.useUtils();
-  const { data } = api.admin.users.list.useQuery({});
+  const { data, isLoading } = api.admin.users.list.useQuery({
+    query: debouncedQuery || undefined,
+    page,
+    limit: 20,
+  });
 
   const updateRole = api.admin.users.updateRole.useMutation({
     onSuccess: () => void utils.admin.users.list.invalidate(),
@@ -16,6 +31,18 @@ export default function AdminUsersPage() {
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-bold">Users</h1>
+
+      <AdminTableControls
+        query={query}
+        onQueryChange={setQuery}
+        searchPlaceholder="Search users by name or email…"
+        page={page}
+        totalPages={data?.totalPages ?? 1}
+        total={data?.total ?? 0}
+        onPageChange={setPage}
+        isLoading={isLoading}
+      />
+
       <div className="overflow-x-auto">
       <Table>
         <TableHeader>

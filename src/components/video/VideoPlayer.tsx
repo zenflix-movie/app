@@ -1,9 +1,12 @@
 "use client";
 import "@videojs/react/video/skin.css";
 
-import { useEffect, useRef, useCallback } from "react";
 import { createPlayer, videoFeatures } from "@videojs/react";
-import { VideoSkin, Video } from "@videojs/react/video";
+import { Video, VideoSkin } from "@videojs/react/video";
+import { useRef } from "react";
+
+import { isYoutubeUrl } from "~/lib/video";
+import { YoutubeVideoPlayer } from "./YoutubeVideoPlayer";
 
 interface VideoPlayerProps {
   src: string;
@@ -14,7 +17,14 @@ interface VideoPlayerProps {
 
 const Player = createPlayer({ features: videoFeatures });
 
-export function VideoPlayer({ src, startAt = 0, onProgress, totalDuration }: VideoPlayerProps) {
+export function VideoPlayer(props: VideoPlayerProps) {
+  if (isYoutubeUrl(props.src)) {
+    return <YoutubeVideoPlayer {...props} />;
+  }
+  return <NativeVideoPlayer {...props} />;
+}
+
+function NativeVideoPlayer({ src, startAt = 0, onProgress, totalDuration }: VideoPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   // const progressTimerRef = useRef<NodeJS.Timeout | null>(null);
 

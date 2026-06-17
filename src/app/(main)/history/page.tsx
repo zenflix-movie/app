@@ -2,7 +2,7 @@ import Link from "next/link";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { api } from "~/trpc/server";
-import { getPresignedDownloadUrl } from "~/server/storage/rustfs";
+import { resolveMediaUrl } from "~/server/storage/rustfs";
 import { Badge } from "~/components/ui/badge";
 import { formatDuration } from "~/lib/utils";
 
@@ -24,9 +24,7 @@ export default async function HistoryPage() {
       ...entry,
       video: {
         ...entry.video,
-        thumbnailUrl: entry.video.thumbnailUrl
-          ? await getPresignedDownloadUrl(entry.video.thumbnailUrl).catch(() => null)
-          : null,
+        thumbnailUrl: await resolveMediaUrl(entry.video.thumbnailUrl),
       },
     })),
   );
