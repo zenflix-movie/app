@@ -32,7 +32,9 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
         <h1 className="text-xl sm:text-2xl font-bold">Browse</h1>
 
         <Suspense fallback={<VideoRowSkeleton />}>
-          <RecommendedSection profileId={profileId} />
+          <div className="mb-12">
+            <RecommendedSection profileId={profileId} />
+          </div>
         </Suspense>
 
         <Suspense>

@@ -12,13 +12,23 @@ interface VideoCardProps {
     releaseYear?: number | null;
     categories?: { id: number; name: string }[];
   };
+  /** Fixed-height carousel layout: caps categories and prevents overflow. */
+  compact?: boolean;
 }
 
-export function VideoCard({ video }: VideoCardProps) {
+export function VideoCard({ video, compact = false }: VideoCardProps) {
+  const visibleCategories = compact ? video.categories?.slice(0, 2) : video.categories;
+  const hiddenCategoryCount =
+    compact && video.categories ? Math.max(0, video.categories.length - 2) : 0;
+
   return (
-    <Link href={`/video/${video.id}`} className="block group">
-      <Card className="overflow-hidden transition-transform group-hover:scale-105">
-        <div className="relative aspect-video overflow-hidden bg-muted">
+    <Link href={`/video/${video.id}`} className="block group h-full">
+      <Card
+        className={`h-full flex flex-col gap-0 py-0 overflow-hidden ${
+          compact ? "" : "transition-transform group-hover:scale-105"
+        }`}
+      >
+        <div className="relative aspect-video shrink-0 overflow-hidden bg-muted">
           {video.thumbnailUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
@@ -37,17 +47,26 @@ export function VideoCard({ video }: VideoCardProps) {
             </span>
           )}
         </div>
-        <CardContent className="p-3">
+        <CardContent className={`p-3 ${compact ? "min-h-0 overflow-hidden" : ""}`}>
           <p className="font-medium text-sm line-clamp-2 leading-snug">{video.name}</p>
-          <div className="flex items-center gap-2 mt-1 flex-wrap">
+          <div
+            className={`flex items-center gap-1.5 mt-1 ${
+              compact ? "overflow-hidden whitespace-nowrap" : "flex-wrap gap-2"
+            }`}
+          >
             {video.releaseYear && (
-              <span className="text-xs text-muted-foreground">{video.releaseYear}</span>
+              <span className="text-xs text-muted-foreground shrink-0">{video.releaseYear}</span>
             )}
-            {video.categories?.map((cat) => (
-              <Badge key={cat.id} variant="secondary" className="text-xs">
+            {visibleCategories?.map((cat) => (
+              <Badge key={cat.id} variant="secondary" className="text-xs shrink-0">
                 {cat.name}
               </Badge>
             ))}
+            {hiddenCategoryCount > 0 && (
+              <span className="text-xs text-muted-foreground shrink-0">
+                +{hiddenCategoryCount}
+              </span>
+            )}
           </div>
         </CardContent>
       </Card>

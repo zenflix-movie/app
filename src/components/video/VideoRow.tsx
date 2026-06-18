@@ -24,7 +24,7 @@ interface VideoRowProps {
   videos: Video[];
 }
 
-const CAROUSEL_HEIGHT = "h-[272px]";
+const CAROUSEL_HEIGHT = "h-[250px]";
 
 export function VideoRow({ title, videos }: VideoRowProps) {
   if (videos.length === 0) return null;
@@ -32,20 +32,18 @@ export function VideoRow({ title, videos }: VideoRowProps) {
   return (
     <section>
       <h2 className="text-lg font-semibold mb-3">{title}</h2>
-      <div className={`relative ${CAROUSEL_HEIGHT}`}>
+      <div className={`relative ${CAROUSEL_HEIGHT} overflow-hidden`}>
         <Carousel
           opts={{ align: "start", dragFree: true }}
           className="h-full w-full"
         >
-          <CarouselContent className={`h-full -ml-4`}>
+          <CarouselContent className="h-full -ml-4">
             {videos.map((video) => (
               <CarouselItem
                 key={video.id}
                 className="h-full pl-4 basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5"
               >
-                <div className="h-full overflow-hidden">
-                  <VideoCard video={video} />
-                </div>
+                <VideoCard video={video} compact />
               </CarouselItem>
             ))}
           </CarouselContent>
