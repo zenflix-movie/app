@@ -13,9 +13,20 @@ interface YoutubeVideoPlayerProps {
   totalDuration?: number;
 }
 
-export function YoutubeVideoPlayer({ src, startAt = 0 }: YoutubeVideoPlayerProps) {
+export function YoutubeVideoPlayer({
+  src,
+  startAt = 0,
+  onProgress,
+  totalDuration,
+}: YoutubeVideoPlayerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const playerRef = useRef<Player | null>(null);
+  const onProgressRef = useRef(onProgress);
+  const totalDurationRef = useRef(totalDuration);
+  const progressTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  onProgressRef.current = onProgress;
+  totalDurationRef.current = totalDuration;
 
   useEffect(() => {
     const container = containerRef.current;
@@ -42,7 +53,32 @@ export function YoutubeVideoPlayer({ src, startAt = 0 }: YoutubeVideoPlayerProps
       });
     }
 
+    const saveProgress = () => {
+      if (!onProgressRef.current) return;
+      const currentTime = player.currentTime() ?? 0;
+      const duration = totalDurationRef.current;
+      const completed = duration ? currentTime >= duration * 0.95 : (player.ended() ?? false);
+      onProgressRef.current(Math.floor(currentTime), completed);
+    };
+
+    const handleTimeUpdate = () => {
+      if (progressTimerRef.current) return;
+      progressTimerRef.current = setTimeout(() => {
+        saveProgress();
+        progressTimerRef.current = null;
+      }, 10_000);
+    };
+
+    const handleEnded = () => saveProgress();
+
+    player.on("timeupdate", handleTimeUpdate);
+    player.on("ended", handleEnded);
+
     return () => {
+      saveProgress();
+      player.off("timeupdate", handleTimeUpdate);
+      player.off("ended", handleEnded);
+      if (progressTimerRef.current) clearTimeout(progressTimerRef.current);
       if (playerRef.current && !playerRef.current.isDisposed()) {
         playerRef.current.dispose();
         playerRef.current = null;
