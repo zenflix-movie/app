@@ -58,11 +58,12 @@ export const watchHistoryRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       await assertProfileOwnership(ctx.db, input.profileId, ctx.session.user.id);
 
-      return ctx.db.query.watchHistory.findFirst({
+      const entry = await ctx.db.query.watchHistory.findFirst({
         where: and(
           eq(watchHistory.videoId, input.videoId),
           eq(watchHistory.profileId, input.profileId),
         ),
       });
+      return entry ?? null;
     }),
 });

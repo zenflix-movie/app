@@ -42,12 +42,13 @@ export const reviewsRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       await assertProfileOwnership(ctx.db, input.profileId, ctx.session.user.id);
 
-      return ctx.db.query.reviews.findFirst({
+      const review = await ctx.db.query.reviews.findFirst({
         where: and(
           eq(reviews.videoId, input.videoId),
           eq(reviews.profileId, input.profileId),
         ),
       });
+      return review ?? null;
     }),
 
   create: protectedProcedure
