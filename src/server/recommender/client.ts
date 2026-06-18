@@ -20,16 +20,25 @@ export async function getRecommendations(
   }
 }
 
-/** Fire-and-forget retrain trigger. 202 = started, 409 = already running. */
-export async function triggerTraining(): Promise<void> {
-  const url = `${env.RECOMMENDER_URL}/train`;
+const TRAIN_TIMEOUT_MS = 2_000;
 
-  try {
-    const res = await fetch(url, { method: "POST", cache: "no-store" });
-    if (!res.ok && res.status !== 409) {
-      console.warn(`Recommender training trigger failed: ${res.status}`);
-    }
-  } catch (err) {
-    console.warn("Recommender training trigger unreachable:", err);
-  }
+/** Schedule retrain in the background without blocking the caller. */
+export function scheduleTraining(): void {
+  setImmediate(() => {
+    const url = `${env.RECOMMENDER_URL}/train`;
+
+    fetch(url, {
+      method: "POST",
+      cache: "no-store",
+      signal: AbortSignal.timeout(TRAIN_TIMEOUT_MS),
+    })
+      .then((res) => {
+        if (!res.ok && res.status !== 409) {
+          console.warn(`Recommender training trigger failed: ${res.status}`);
+        }
+      })
+      .catch(() => {
+        // Unreachable or timed out — training is best-effort.
+      });
+  });
 }

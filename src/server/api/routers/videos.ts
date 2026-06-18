@@ -10,7 +10,7 @@ import {
 } from "~/server/api/trpc";
 import { reviews, videoCategories, videos } from "~/server/db/schema";
 import { getPresignedUploadUrl, resolveMediaUrl } from "~/server/storage/rustfs";
-import { triggerTraining } from "~/server/recommender/client";
+import { scheduleTraining } from "~/server/recommender/client";
 import { createVideoSchema, updateVideoSchema } from "~/lib/validations/video";
 
 const videoWithCategories = {
@@ -132,7 +132,7 @@ export const videosRouter = createTRPCRouter({
       const url = await resolveMediaUrl(video.fileUrl, 7200);
       if (!url) throw new TRPCError({ code: "NOT_FOUND", message: "Stream unavailable" });
 
-      void triggerTraining();
+      scheduleTraining();
 
       return { url };
     }),
