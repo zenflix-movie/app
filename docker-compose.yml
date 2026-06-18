@@ -2,7 +2,7 @@ services:
   app:
     image: tuguldurdev/zenflix-movie
     build:
-      context: ./app
+      context: .
       dockerfile: Dockerfile
     ports:
       - "3000:3000"
