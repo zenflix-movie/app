@@ -3,7 +3,7 @@ import "@videojs/react/video/skin.css";
 
 import { createPlayer, videoFeatures } from "@videojs/react";
 import { Video, VideoSkin } from "@videojs/react/video";
-import { useCallback, useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 
 import { isYoutubeUrl } from "~/lib/video";
 import { YoutubeVideoPlayer } from "./YoutubeVideoPlayer";
@@ -27,17 +27,21 @@ export function VideoPlayer(props: VideoPlayerProps) {
 function NativeVideoPlayer({ src, startAt = 0, onProgress, totalDuration }: VideoPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const progressTimerRef = useRef<NodeJS.Timeout | null>(null);
-
-  const saveProgress = useCallback(() => {
-    const video = videoRef.current;
-    if (!video || !onProgress) return;
-    const completed = totalDuration ? video.currentTime >= totalDuration * 0.95 : video.ended;
-    onProgress(Math.floor(video.currentTime), completed);
-  }, [onProgress, totalDuration]);
+  const onProgressRef = useRef(onProgress);
+  const totalDurationRef = useRef(totalDuration);
+  onProgressRef.current = onProgress;
+  totalDurationRef.current = totalDuration;
 
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
+
+    const saveProgress = () => {
+      if (!onProgressRef.current) return;
+      const duration = totalDurationRef.current;
+      const completed = duration ? video.currentTime >= duration * 0.95 : video.ended;
+      onProgressRef.current(Math.floor(video.currentTime), completed);
+    };
 
     const seek = () => {
       if (startAt > 0) video.currentTime = startAt;
@@ -65,7 +69,7 @@ function NativeVideoPlayer({ src, startAt = 0, onProgress, totalDuration }: Vide
       video.removeEventListener("ended", handleEnded);
       if (progressTimerRef.current) clearTimeout(progressTimerRef.current);
     };
-  }, [src, startAt, saveProgress]);
+  }, [src, startAt]);
 
   return (
     <Player.Provider>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback } from "react";
+import { useCallback, useRef } from "react";
 import { VideoPlayer } from "~/components/video/VideoPlayer";
 import { api } from "~/trpc/react";
 
@@ -12,19 +12,23 @@ interface WatchClientProps {
 }
 
 export function WatchClient({ video, streamUrl, profileId, startAt = 0 }: WatchClientProps) {
-  const upsertProgress = api.watchHistory.upsert.useMutation();
+  const { mutate } = api.watchHistory.upsert.useMutation();
+  const lastSavedRef = useRef<{ watchDuration: number; completed: boolean } | null>(null);
 
   const handleProgress = useCallback(
     (watchDuration: number, completed: boolean) => {
       if (!profileId) return;
-      upsertProgress.mutate({
+      const last = lastSavedRef.current;
+      if (last?.watchDuration === watchDuration && last.completed === completed) return;
+      lastSavedRef.current = { watchDuration, completed };
+      mutate({
         videoId: video.id,
         profileId,
         watchDuration,
         completed,
       });
     },
-    [profileId, video.id, upsertProgress],
+    [profileId, video.id, mutate],
   );
 
   return (
