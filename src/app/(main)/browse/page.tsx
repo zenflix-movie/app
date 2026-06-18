@@ -3,6 +3,8 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { api, HydrateClient } from "~/trpc/server";
 import { VideoGrid, VideoGridSkeleton } from "~/components/video/VideoGrid";
+import { VideoRowSkeleton } from "~/components/video/VideoRow";
+import { RecommendedSection } from "~/components/video/RecommendedSection";
 import { CategoryTabs } from "~/components/layout/CategoryTabs";
 
 interface BrowsePageProps {
@@ -16,7 +18,8 @@ async function VideoSection({ categoryId }: { categoryId?: number }) {
 
 export default async function BrowsePage({ searchParams }: BrowsePageProps) {
   const cookieStore = await cookies();
-  if (!cookieStore.get("selectedProfileId")?.value) redirect("/profiles");
+  const profileId = cookieStore.get("selectedProfileId")?.value;
+  if (!profileId) redirect("/profiles");
 
   const params = await searchParams;
   const categoryId = params.category ? parseInt(params.category) : undefined;
@@ -27,6 +30,10 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
     <HydrateClient>
       <div className="container mx-auto px-4 py-8 space-y-6">
         <h1 className="text-xl sm:text-2xl font-bold">Browse</h1>
+
+        <Suspense fallback={<VideoRowSkeleton />}>
+          <RecommendedSection profileId={profileId} />
+        </Suspense>
 
         <Suspense>
           <CategoryTabs />

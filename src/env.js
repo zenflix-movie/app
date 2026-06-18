@@ -17,6 +17,7 @@ export const env = createEnv({
     RUSTFS_BUCKET: z.string().default("zenflix"),
     RUSTFS_PUBLIC_URL: z.string().url().optional(),
     REDIS_URL: z.string().url().optional(),
+    RECOMMENDER_URL: z.string().url().default("http://localhost:8000"),
   },
 
   client: {
@@ -33,6 +34,7 @@ export const env = createEnv({
     RUSTFS_BUCKET: process.env.RUSTFS_BUCKET,
     RUSTFS_PUBLIC_URL: process.env.RUSTFS_PUBLIC_URL,
     REDIS_URL: process.env.REDIS_URL,
+    RECOMMENDER_URL: process.env.RECOMMENDER_URL,
     NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
   },
   // Set SKIP_ENV_VALIDATION to skip validation (used by the Docker build).

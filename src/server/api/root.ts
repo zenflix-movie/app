@@ -5,6 +5,7 @@ import { videosRouter } from "~/server/api/routers/videos";
 import { categoriesRouter } from "~/server/api/routers/categories";
 import { reviewsRouter } from "~/server/api/routers/reviews";
 import { watchHistoryRouter } from "~/server/api/routers/watchHistory";
+import { recommendationsRouter } from "~/server/api/routers/recommendations";
 import { adminRouter } from "~/server/api/routers/admin";
 
 export const appRouter = createTRPCRouter({
@@ -14,6 +15,7 @@ export const appRouter = createTRPCRouter({
   categories: categoriesRouter,
   reviews: reviewsRouter,
   watchHistory: watchHistoryRouter,
+  recommendations: recommendationsRouter,
   admin: adminRouter,
 });
 
