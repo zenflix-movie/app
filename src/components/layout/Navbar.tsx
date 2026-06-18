@@ -1,8 +1,10 @@
 import Link from "next/link";
+import { Suspense } from "react";
 import { auth } from "~/server/auth";
 import { Button } from "~/components/ui/button";
 import { NavbarClient } from "./NavbarClient";
 import { MobileNav } from "./MobileNav";
+import { NavbarSearch } from "./NavbarSearch";
 
 export async function Navbar() {
   const session = await auth();
@@ -18,12 +20,9 @@ export async function Navbar() {
           <span className="text-red-600">Zen</span>flix
         </Link>
 
-        <nav className="hidden md:flex items-center gap-4 flex-1">
+        <nav className="hidden md:flex items-center gap-4">
           <Link href="/browse" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
             Browse
-          </Link>
-          <Link href="/search" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
-            Search
           </Link>
           {session?.user && (
             <Link href="/history" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
@@ -37,7 +36,11 @@ export async function Navbar() {
           )}
         </nav>
 
-        <div className="ml-auto">
+        <Suspense>
+          <NavbarSearch className="flex-1 max-w-md mx-2 md:mx-4" />
+        </Suspense>
+
+        <div className="shrink-0 ml-auto">
           {session?.user ? (
             <NavbarClient user={session.user} />
           ) : (

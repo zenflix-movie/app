@@ -16,7 +16,6 @@ export function MobileNav({ isLoggedIn, isAdmin }: MobileNavProps) {
 
   const links = [
     { href: "/browse", label: "Browse" },
-    { href: "/search", label: "Search" },
     ...(isLoggedIn ? [{ href: "/history", label: "My List" }] : []),
     ...(isAdmin ? [{ href: "/admin", label: "Admin" }] : []),
   ];

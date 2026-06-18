@@ -8,12 +8,24 @@ import { RecommendedSection } from "~/components/video/RecommendedSection";
 import { CategoryTabs } from "~/components/layout/CategoryTabs";
 
 interface BrowsePageProps {
-  searchParams: Promise<{ category?: string }>;
+  searchParams: Promise<{ category?: string; q?: string }>;
 }
 
 async function VideoSection({ categoryId }: { categoryId?: number }) {
   const data = await api.videos.list({ categoryId, limit: 40 });
   return <VideoGrid videos={data.items} />;
+}
+
+async function SearchSection({ query }: { query: string }) {
+  const videos = await api.videos.search({ query });
+  if (videos.length === 0) {
+    return (
+      <p className="text-muted-foreground py-12 text-center">
+        No results for &quot;{query}&quot;
+      </p>
+    );
+  }
+  return <VideoGrid videos={videos} />;
 }
 
 export default async function BrowsePage({ searchParams }: BrowsePageProps) {
@@ -23,27 +35,39 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
 
   const params = await searchParams;
   const categoryId = params.category ? parseInt(params.category) : undefined;
+  const searchQuery = params.q?.trim() ?? "";
+  const isSearching = searchQuery.length > 0;
 
   void api.categories.list.prefetch();
 
   return (
     <HydrateClient>
       <div className="container mx-auto px-4 py-8 space-y-6">
-        <h1 className="text-xl sm:text-2xl font-bold">Browse</h1>
+        <h1 className="text-xl sm:text-2xl font-bold">
+          {isSearching ? `Results for "${searchQuery}"` : "Browse"}
+        </h1>
 
-        <Suspense fallback={<VideoRowSkeleton />}>
-          <div className="mb-12">
-            <RecommendedSection profileId={profileId} />
-          </div>
-        </Suspense>
+        {isSearching ? (
+          <Suspense fallback={<VideoGridSkeleton />} key={searchQuery}>
+            <SearchSection query={searchQuery} />
+          </Suspense>
+        ) : (
+          <>
+            <Suspense fallback={<VideoRowSkeleton />}>
+              <div className="mb-12">
+                <RecommendedSection profileId={profileId} />
+              </div>
+            </Suspense>
 
-        <Suspense>
-          <CategoryTabs />
-        </Suspense>
+            <Suspense>
+              <CategoryTabs />
+            </Suspense>
 
-        <Suspense fallback={<VideoGridSkeleton />}>
-          <VideoSection categoryId={categoryId} />
-        </Suspense>
+            <Suspense fallback={<VideoGridSkeleton />}>
+              <VideoSection categoryId={categoryId} />
+            </Suspense>
+          </>
+        )}
       </div>
     </HydrateClient>
   );

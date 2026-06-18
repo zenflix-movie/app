@@ -43,7 +43,13 @@ export const watchHistoryRouter = createTRPCRouter({
 
       return ctx.db.query.watchHistory.findMany({
         where: eq(watchHistory.profileId, input.profileId),
-        with: { video: true },
+        with: {
+          video: {
+            with: {
+              videoCategories: { with: { category: true } },
+            },
+          },
+        },
         orderBy: (wh, { desc }) => desc(wh.lastWatchedAt),
       });
     }),

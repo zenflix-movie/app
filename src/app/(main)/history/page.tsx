@@ -25,6 +25,7 @@ export default async function HistoryPage() {
       video: {
         ...entry.video,
         thumbnailUrl: await resolveMediaUrl(entry.video.thumbnailUrl),
+        categories: entry.video.videoCategories.map((row) => row.category),
       },
     })),
   );
@@ -86,6 +87,18 @@ export default async function HistoryPage() {
                     <p className="font-medium text-sm line-clamp-2 leading-snug">
                       {entry.video.name}
                     </p>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      {entry.video.releaseYear && (
+                        <span className="text-xs text-muted-foreground">
+                          {entry.video.releaseYear}
+                        </span>
+                      )}
+                      {entry.video.categories.map((cat) => (
+                        <Badge key={cat.id} variant="secondary" className="text-xs">
+                          {cat.name}
+                        </Badge>
+                      ))}
+                    </div>
                     <p className="text-xs text-muted-foreground">
                       {entry.completed
                         ? "Completed"
